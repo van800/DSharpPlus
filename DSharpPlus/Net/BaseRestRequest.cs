@@ -30,6 +30,11 @@ namespace DSharpPlus.Net
         public string Route { get; }
 
         /// <summary>
+        /// Gets the handling options for this request. 
+        /// </summary>
+        public RestRequestOptions RequestOptions { get; }
+
+        /// <summary>
         /// Gets the headers sent with this request.
         /// </summary>
         public IReadOnlyDictionary<string, string> Headers { get; } = null;
@@ -54,7 +59,15 @@ namespace DSharpPlus.Net
         /// <param name="route">The generic route the request url will use.</param>
         /// <param name="headers">Additional headers for this request.</param>
         /// <param name="ratelimitWaitOverride">Override for ratelimit bucket wait time.</param>
-        internal BaseRestRequest(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, double? ratelimitWaitOverride = null)
+        /// <param name="options">The handling options for this request.</param>
+        internal BaseRestRequest(BaseDiscordClient client, 
+            RateLimitBucket bucket, 
+            Uri url, 
+            RestRequestMethod method, 
+            string route, 
+            IReadOnlyDictionary<string, string> headers = null, 
+            double? ratelimitWaitOverride = null,
+            RestRequestOptions options = null)
         {
             this.Discord = client;
             this.RateLimitBucket = bucket;
@@ -70,6 +83,9 @@ namespace DSharpPlus.Net
                     .ToDictionary(x => x.Key, x => x.Value);
                 this.Headers = headers;
             }
+
+            if (options == null)
+                this.RequestOptions = new RestRequestOptions();
         }
 
         /// <summary>

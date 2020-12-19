@@ -13,8 +13,17 @@ namespace DSharpPlus.Net
         /// </summary>
         public string Payload { get; }
 
-        internal RestRequest(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, string payload = null, double? ratelimitWaitOverride = null)
-            : base(client, bucket, url, method, route, headers, ratelimitWaitOverride)
+        internal RestRequest(BaseDiscordClient client, 
+            RateLimitBucket bucket, 
+            Uri url, 
+            RestRequestMethod method, 
+            string route, 
+            IReadOnlyDictionary<string, string> headers = null, 
+            string payload = null, 
+            double? ratelimitWaitOverride = null, 
+            RestRequestOptions options = null)
+
+            : base(client, bucket, url, method, route, headers, ratelimitWaitOverride, options)
         {
             this.Payload = payload;
         }

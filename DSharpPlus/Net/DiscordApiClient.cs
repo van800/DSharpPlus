@@ -109,9 +109,9 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        private Task<RestResponse> DoRequestAsync(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, string payload = null, double? ratelimitWaitOverride = null)
+        private Task<RestResponse> DoRequestAsync(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, string payload = null, double? ratelimitWaitOverride = null, RestRequestOptions options = null)
         {
-            var req = new RestRequest(client, bucket, url, method, route, headers, payload, ratelimitWaitOverride);
+            var req = new RestRequest(client, bucket, url, method, route, headers, payload, ratelimitWaitOverride, options);
 
             if (this.Discord != null)
                 this.Rest.ExecuteRequestAsync(req).LogTaskFault(this.Discord.Logger, LogLevel.Error, LoggerEvents.RestError, "Error while executing request");
@@ -122,9 +122,9 @@ namespace DSharpPlus.Net
         }
 
         private Task<RestResponse> DoMultipartAsync(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, IReadOnlyDictionary<string, string> values = null,
-            IReadOnlyDictionary<string, Stream> files = null, double? ratelimitWaitOverride = null)
+            IReadOnlyDictionary<string, Stream> files = null, double? ratelimitWaitOverride = null, RestRequestOptions options = null)
         {
-            var req = new MultipartWebRequest(client, bucket, url, method, route, headers, values, files, ratelimitWaitOverride);
+            var req = new MultipartWebRequest(client, bucket, url, method, route, headers, values, files, ratelimitWaitOverride, options);
 
             if (this.Discord != null)
                 this.Rest.ExecuteRequestAsync(req).LogTaskFault(this.Discord.Logger, LogLevel.Error, LoggerEvents.RestError, "Error while executing request");
@@ -136,7 +136,7 @@ namespace DSharpPlus.Net
 
         #region Guild
         internal async Task<DiscordGuild> CreateGuildAsync(string name, string region_id, Optional<string> iconb64, VerificationLevel? verification_level,
-            DefaultMessageNotifications? default_message_notifications)
+            DefaultMessageNotifications? default_message_notifications, RestRequestOptions options)
         {
             var pld = new RestGuildCreatePayload
             {
@@ -162,7 +162,7 @@ namespace DSharpPlus.Net
             return guild;
         }
 
-        internal async Task DeleteGuildAsync(ulong guild_id)
+        internal async Task DeleteGuildAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { guild_id }, out var path);
@@ -182,7 +182,7 @@ namespace DSharpPlus.Net
             Optional<DefaultMessageNotifications> defaultMessageNotifications, Optional<MfaLevel> mfaLevel,
             Optional<ExplicitContentFilter> explicitContentFilter, Optional<ulong?> afkChannelId,
             Optional<int> afkTimeout, Optional<string> iconb64, Optional<ulong> ownerId, Optional<string> splashb64,
-            Optional<ulong?> systemChannelId, string reason)
+            Optional<ulong?> systemChannelId, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildModifyPayload
             {
@@ -221,7 +221,7 @@ namespace DSharpPlus.Net
             return guild;
         }
 
-        internal async Task<IReadOnlyList<DiscordBan>> GetGuildBansAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordBan>> GetGuildBansAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.BANS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -251,7 +251,7 @@ namespace DSharpPlus.Net
             return bans;
         }
 
-        internal Task CreateGuildBanAsync(ulong guild_id, ulong user_id, int delete_message_days, string reason)
+        internal Task CreateGuildBanAsync(ulong guild_id, ulong user_id, int delete_message_days, string reason, RestRequestOptions options)
         {
             if (delete_message_days < 0 || delete_message_days > 7)
                 throw new ArgumentException("Delete message days must be a number between 0 and 7.", nameof(delete_message_days));
@@ -270,7 +270,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route);
         }
 
-        internal Task RemoveGuildBanAsync(ulong guild_id, ulong user_id, string reason)
+        internal Task RemoveGuildBanAsync(ulong guild_id, ulong user_id, string reason, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (reason != null)
@@ -283,7 +283,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route);
         }
 
-        internal Task LeaveGuildAsync(ulong guild_id)
+        internal Task LeaveGuildAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.USERS}{Endpoints.ME}{Endpoints.GUILDS}/:guild_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { guild_id }, out var path);
@@ -292,7 +292,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route);
         }
 
-        internal async Task<DiscordMember> AddGuildMemberAsync(ulong guild_id, ulong user_id, string access_token, string nick, IEnumerable<DiscordRole> roles, bool muted, bool deafened)
+        internal async Task<DiscordMember> AddGuildMemberAsync(ulong guild_id, ulong user_id, string access_token, string nick, IEnumerable<DiscordRole> roles, bool muted, bool deafened, RestRequestOptions options)
         {
             var pld = new RestGuildMemberAddPayload
             {
@@ -314,7 +314,7 @@ namespace DSharpPlus.Net
             return new DiscordMember(tm) { Discord = this.Discord, _guild_id = guild_id };
         }
 
-        internal async Task<IReadOnlyList<TransportMember>> ListGuildMembersAsync(ulong guild_id, int? limit, ulong? after)
+        internal async Task<IReadOnlyList<TransportMember>> ListGuildMembersAsync(ulong guild_id, int? limit, ulong? after, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (limit != null && limit > 0)
@@ -332,7 +332,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<TransportMember>(members_raw);
         }
 
-        internal Task AddGuildMemberRoleAsync(ulong guild_id, ulong user_id, ulong role_id, string reason)
+        internal Task AddGuildMemberRoleAsync(ulong guild_id, ulong user_id, ulong role_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -345,7 +345,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route, headers);
         }
 
-        internal Task RemoveGuildMemberRoleAsync(ulong guild_id, ulong user_id, ulong role_id, string reason)
+        internal Task RemoveGuildMemberRoleAsync(ulong guild_id, ulong user_id, ulong role_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -358,7 +358,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal Task ModifyGuildChannelPositionAsync(ulong guild_id, IEnumerable<RestGuildChannelReorderPayload> pld, string reason)
+        internal Task ModifyGuildChannelPositionAsync(ulong guild_id, IEnumerable<RestGuildChannelReorderPayload> pld, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -371,7 +371,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PATCH, route, headers, DiscordJson.SerializeObject(pld));
         }
 
-        internal Task ModifyGuildRolePositionAsync(ulong guild_id, IEnumerable<RestGuildRoleReorderPayload> pld, string reason)
+        internal Task ModifyGuildRolePositionAsync(ulong guild_id, IEnumerable<RestGuildRoleReorderPayload> pld, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -384,7 +384,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PATCH, route, headers, DiscordJson.SerializeObject(pld));
         }
 
-        internal async Task<AuditLog> GetAuditLogsAsync(ulong guild_id, int limit, ulong? after, ulong? before, ulong? responsible, int? action_type)
+        internal async Task<AuditLog> GetAuditLogsAsync(ulong guild_id, int limit, ulong? after, ulong? before, ulong? responsible, int? action_type, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>
             {
@@ -410,7 +410,7 @@ namespace DSharpPlus.Net
             return audit_log_data_raw;
         }
 
-        internal async Task<DiscordInvite> GetGuildVanityUrlAsync(ulong guild_id)
+        internal async Task<DiscordInvite> GetGuildVanityUrlAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.VANITY_URL}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -423,7 +423,7 @@ namespace DSharpPlus.Net
             return invite;
         }
 
-        internal async Task<DiscordWidget> GetGuildWidgetAsync(ulong guild_id)
+        internal async Task<DiscordWidget> GetGuildWidgetAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.WIDGET_JSON}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -458,7 +458,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordWidgetSettings> GetGuildWidgetSettingsAsync(ulong guild_id)
+        internal async Task<DiscordWidgetSettings> GetGuildWidgetSettingsAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.WIDGET}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -472,7 +472,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordWidgetSettings> ModifyGuildWidgetSettingsAsync(ulong guild_id, bool? isEnabled, ulong? channelId, string reason)
+        internal async Task<DiscordWidgetSettings> ModifyGuildWidgetSettingsAsync(ulong guild_id, bool? isEnabled, ulong? channelId, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildWidgetSettingsPayload
             {
@@ -498,7 +498,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Channel
-        internal async Task<DiscordChannel> CreateGuildChannelAsync(ulong guild_id, string name, ChannelType type, ulong? parent, Optional<string> topic, int? bitrate, int? user_limit, IEnumerable<DiscordOverwriteBuilder> overwrites, bool? nsfw, Optional<int?> perUserRateLimit, string reason)
+        internal async Task<DiscordChannel> CreateGuildChannelAsync(ulong guild_id, string name, ChannelType type, ulong? parent, Optional<string> topic, int? bitrate, int? user_limit, IEnumerable<DiscordOverwriteBuilder> overwrites, bool? nsfw, Optional<int?> perUserRateLimit, string reason, RestRequestOptions options)
         {
             var restoverwrites = new List<DiscordRestOverwrite>();
             if (overwrites != null)
@@ -539,7 +539,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task ModifyChannelAsync(ulong channel_id, string name, int? position, Optional<string> topic, bool? nsfw, Optional<ulong?> parent, int? bitrate, int? user_limit, Optional<int?> perUserRateLimit, string reason)
+        internal Task ModifyChannelAsync(ulong channel_id, string name, int? position, Optional<string> topic, bool? nsfw, Optional<ulong?> parent, int? bitrate, int? user_limit, Optional<int?> perUserRateLimit, string reason, RestRequestOptions options)
         {
             var pld = new RestChannelModifyPayload
             {
@@ -564,7 +564,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PATCH, route, headers, DiscordJson.SerializeObject(pld));
         }
 
-        internal async Task<DiscordChannel> GetChannelAsync(ulong channel_id)
+        internal async Task<DiscordChannel> GetChannelAsync(ulong channel_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id }, out var path);
@@ -583,7 +583,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteChannelAsync(ulong channel_id, string reason)
+        internal Task DeleteChannelAsync(ulong channel_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -609,7 +609,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordMessage> CreateMessageAsync(ulong channel_id, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        internal async Task<DiscordMessage> CreateMessageAsync(ulong channel_id, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions, RestRequestOptions options)
         {
             if (content != null && content.Length > 2000)
                 throw new ArgumentException("Message content length cannot exceed 2000 characters.");
@@ -649,7 +649,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordMessage> UploadFileAsync(ulong channel_id, Stream file_data, string file_name, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        internal async Task<DiscordMessage> UploadFileAsync(ulong channel_id, Stream file_data, string file_name, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions, RestRequestOptions options)
         {
             var file = new Dictionary<string, Stream> { { file_name, file_data } };
 
@@ -684,7 +684,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordMessage> UploadFilesAsync(ulong channel_id, Dictionary<string, Stream> files, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions)
+        internal async Task<DiscordMessage> UploadFilesAsync(ulong channel_id, Dictionary<string, Stream> files, string content, bool? tts, DiscordEmbed embed, IEnumerable<IMention> mentions, RestRequestOptions options)
         {
             if (embed?.Timestamp != null)
                 embed.Timestamp = embed.Timestamp.Value.ToUniversalTime();
@@ -720,7 +720,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<IReadOnlyList<DiscordChannel>> GetGuildChannelsAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordChannel>> GetGuildChannelsAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.CHANNELS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -740,7 +740,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordChannel>(new List<DiscordChannel>(channels_raw));
         }
 
-        internal async Task<IReadOnlyList<DiscordMessage>> GetChannelMessagesAsync(ulong channel_id, int limit, ulong? before, ulong? after, ulong? around)
+        internal async Task<IReadOnlyList<DiscordMessage>> GetChannelMessagesAsync(ulong channel_id, int limit, ulong? before, ulong? after, ulong? around, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (around != null)
@@ -766,7 +766,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordMessage>(new List<DiscordMessage>(msgs));
         }
         
-        internal async Task<DiscordMessage> GetChannelMessageAsync(ulong channel_id, ulong message_id)
+        internal async Task<DiscordMessage> GetChannelMessageAsync(ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id, message_id }, out var path);
@@ -779,7 +779,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task ModifyEmbedSuppressionAsync(bool suppress, ulong channel_id, ulong message_id)
+        internal Task ModifyEmbedSuppressionAsync(bool suppress, ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var pld = new RestChannelMessageSuppressEmbedsPayload
             {
@@ -793,7 +793,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.POST, route, payload: DiscordJson.SerializeObject(pld));
         }
 
-        internal async Task<DiscordMessage> EditMessageAsync(ulong channel_id, ulong message_id, Optional<string> content, Optional<DiscordEmbed> embed, IEnumerable<IMention> mentions)
+        internal async Task<DiscordMessage> EditMessageAsync(ulong channel_id, ulong message_id, Optional<string> content, Optional<DiscordEmbed> embed, IEnumerable<IMention> mentions, RestRequestOptions options)
         {
             if (embed.HasValue && embed.Value != null && embed.Value.Timestamp != null)
                 embed.Value.Timestamp = embed.Value.Timestamp.Value.ToUniversalTime();
@@ -820,7 +820,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteMessageAsync(ulong channel_id, ulong message_id, string reason)
+        internal Task DeleteMessageAsync(ulong channel_id, ulong message_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -851,7 +851,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.POST, route, headers, DiscordJson.SerializeObject(pld));
         }
 
-        internal async Task<IReadOnlyList<DiscordInvite>> GetChannelInvitesAsync(ulong channel_id)
+        internal async Task<IReadOnlyList<DiscordInvite>> GetChannelInvitesAsync(ulong channel_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.INVITES}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id }, out var path);
@@ -864,7 +864,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordInvite>(new List<DiscordInvite>(invites_raw));
         }
 
-        internal async Task<DiscordInvite> CreateChannelInviteAsync(ulong channel_id, int max_age, int max_uses, bool temporary, bool unique, string reason)
+        internal async Task<DiscordInvite> CreateChannelInviteAsync(ulong channel_id, int max_age, int max_uses, bool temporary, bool unique, string reason, RestRequestOptions options)
         {
             var pld = new RestChannelInviteCreatePayload
             {
@@ -890,7 +890,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteChannelPermissionAsync(ulong channel_id, ulong overwrite_id, string reason)
+        internal Task DeleteChannelPermissionAsync(ulong channel_id, ulong overwrite_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -903,7 +903,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal Task EditChannelPermissionsAsync(ulong channel_id, ulong overwrite_id, Permissions allow, Permissions deny, string type, string reason)
+        internal Task EditChannelPermissionsAsync(ulong channel_id, ulong overwrite_id, Permissions allow, Permissions deny, string type, string reason, RestRequestOptions options)
         {
             var pld = new RestChannelPermissionEditPayload
             {
@@ -923,7 +923,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route, headers, DiscordJson.SerializeObject(pld));
         }
 
-        internal Task TriggerTypingAsync(ulong channel_id)
+        internal Task TriggerTypingAsync(ulong channel_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.TYPING}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.POST, route, new { channel_id }, out var path);
@@ -932,7 +932,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.POST, route);
         }
 
-        internal async Task<IReadOnlyList<DiscordMessage>> GetPinnedMessagesAsync(ulong channel_id)
+        internal async Task<IReadOnlyList<DiscordMessage>> GetPinnedMessagesAsync(ulong channel_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.PINS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id }, out var path);
@@ -948,7 +948,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordMessage>(new List<DiscordMessage>(msgs));
         }
 
-        internal Task PinMessageAsync(ulong channel_id, ulong message_id)
+        internal Task PinMessageAsync(ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.PINS}/:message_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.PUT, route, new { channel_id, message_id }, out var path);
@@ -957,7 +957,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route);
         }
 
-        internal Task UnpinMessageAsync(ulong channel_id, ulong message_id)
+        internal Task UnpinMessageAsync(ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.PINS}/:message_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { channel_id, message_id }, out var path);
@@ -966,7 +966,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route);
         }
 
-        internal Task AddGroupDmRecipientAsync(ulong channel_id, ulong user_id, string access_token, string nickname)
+        internal Task AddGroupDmRecipientAsync(ulong channel_id, ulong user_id, string access_token, string nickname, RestRequestOptions options)
         {
             var pld = new RestChannelGroupDmRecipientAddPayload
             {
@@ -981,7 +981,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route, payload: DiscordJson.SerializeObject(pld));
         }
 
-        internal Task RemoveGroupDmRecipientAsync(ulong channel_id, ulong user_id)
+        internal Task RemoveGroupDmRecipientAsync(ulong channel_id, ulong user_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.USERS}{Endpoints.ME}{Endpoints.CHANNELS}/:channel_id{Endpoints.RECIPIENTS}/:user_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { channel_id, user_id }, out var path);
@@ -990,7 +990,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route);
         }
 
-        internal async Task<DiscordDmChannel> CreateGroupDmAsync(IEnumerable<string> access_tokens, IDictionary<ulong, string> nicks)
+        internal async Task<DiscordDmChannel> CreateGroupDmAsync(IEnumerable<string> access_tokens, IDictionary<ulong, string> nicks, RestRequestOptions options)
         {
             var pld = new RestUserGroupDmCreatePayload
             {
@@ -1010,7 +1010,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordDmChannel> CreateDmAsync(ulong recipient_id)
+        internal async Task<DiscordDmChannel> CreateDmAsync(ulong recipient_id, RestRequestOptions options)
         {
             var pld = new RestUserDmCreatePayload
             {
@@ -1029,7 +1029,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordFollowedChannel> FollowChannelAsync(ulong channel_id, ulong webhook_channel_id)
+        internal async Task<DiscordFollowedChannel> FollowChannelAsync(ulong channel_id, ulong webhook_channel_id, RestRequestOptions options)
         {
             var pld = new FollowedChannelAddPayload
             {
@@ -1045,7 +1045,7 @@ namespace DSharpPlus.Net
             return JsonConvert.DeserializeObject<DiscordFollowedChannel>(response.Response);
         }
 
-        internal async Task<DiscordMessage> CrosspostMessageAsync(ulong channel_id, ulong message_id)
+        internal async Task<DiscordMessage> CrosspostMessageAsync(ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id{Endpoints.CROSSPOST}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.POST, route, new {channel_id, message_id}, out var path);
@@ -1058,13 +1058,13 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Member
-        internal Task<DiscordUser> GetCurrentUserAsync()
-            => this.GetUserAsync("@me");
+        internal Task<DiscordUser> GetCurrentUserAsync(RestRequestOptions options)
+            => this.GetUserAsync("@me", options);
 
-        internal Task<DiscordUser> GetUserAsync(ulong user_id)
-            => this.GetUserAsync(user_id.ToString(CultureInfo.InvariantCulture));
+        internal Task<DiscordUser> GetUserAsync(ulong user_id, RestRequestOptions options)
+            => this.GetUserAsync(user_id.ToString(CultureInfo.InvariantCulture), options);
 
-        internal async Task<DiscordUser> GetUserAsync(string user_id)
+        internal async Task<DiscordUser> GetUserAsync(string user_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.USERS}/:user_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { user_id }, out var path);
@@ -1078,7 +1078,7 @@ namespace DSharpPlus.Net
             return duser;
         }
 
-        internal async Task<DiscordMember> GetGuildMemberAsync(ulong guild_id, ulong user_id)
+        internal async Task<DiscordMember> GetGuildMemberAsync(ulong guild_id, ulong user_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.MEMBERS}/:user_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id, user_id }, out var path);
@@ -1104,7 +1104,7 @@ namespace DSharpPlus.Net
             };
         }
 
-        internal Task RemoveGuildMemberAsync(ulong guild_id, ulong user_id, string reason)
+        internal Task RemoveGuildMemberAsync(ulong guild_id, ulong user_id, string reason, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (reason != null)
@@ -1117,7 +1117,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route);
         }
 
-        internal async Task<TransportUser> ModifyCurrentUserAsync(string username, Optional<string> base64_avatar)
+        internal async Task<TransportUser> ModifyCurrentUserAsync(string username, Optional<string> base64_avatar, RestRequestOptions options)
         {
             var pld = new RestUserUpdateCurrentPayload
             {
@@ -1137,7 +1137,7 @@ namespace DSharpPlus.Net
             return user_raw;
         }
 
-        internal async Task<IReadOnlyList<DiscordGuild>> GetCurrentUserGuildsAsync(int limit = 100, ulong? before = null, ulong? after = null)
+        internal async Task<IReadOnlyList<DiscordGuild>> GetCurrentUserGuildsAsync(int limit = 100, ulong? before = null, ulong? after = null, RestRequestOptions options = null)
         {
             var route = $"{Endpoints.USERS}{Endpoints.ME}{Endpoints.GUILDS}";
 
@@ -1167,7 +1167,7 @@ namespace DSharpPlus.Net
 
         internal Task ModifyGuildMemberAsync(ulong guild_id, ulong user_id, Optional<string> nick,
             Optional<IEnumerable<ulong>> role_ids, Optional<bool> mute, Optional<bool> deaf,
-            Optional<ulong?> voice_channel_id, string reason)
+            Optional<ulong?> voice_channel_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1189,7 +1189,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PATCH, route, headers, payload: DiscordJson.SerializeObject(pld));
         }
 
-        internal Task ModifyCurrentMemberNicknameAsync(ulong guild_id, string nick, string reason)
+        internal Task ModifyCurrentMemberNicknameAsync(ulong guild_id, string nick, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1209,7 +1209,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Roles
-        internal async Task<IReadOnlyList<DiscordRole>> GetGuildRolesAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordRole>> GetGuildRolesAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.ROLES}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1222,7 +1222,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordRole>(new List<DiscordRole>(roles_raw));
         }
 
-        internal async Task<DiscordGuild> GetGuildAsync(ulong guildId, bool? with_counts)
+        internal async Task<DiscordGuild> GetGuildAsync(ulong guildId, bool? with_counts, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (with_counts.HasValue)
@@ -1252,7 +1252,7 @@ namespace DSharpPlus.Net
             }
         }
 
-        internal async Task<DiscordRole> ModifyGuildRoleAsync(ulong guild_id, ulong role_id, string name, Permissions? permissions, int? color, bool? hoist, bool? mentionable, string reason)
+        internal async Task<DiscordRole> ModifyGuildRoleAsync(ulong guild_id, ulong role_id, string name, Permissions? permissions, int? color, bool? hoist, bool? mentionable, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildRolePayload
             {
@@ -1280,7 +1280,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteRoleAsync(ulong guild_id, ulong role_id, string reason)
+        internal Task DeleteRoleAsync(ulong guild_id, ulong role_id, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1293,7 +1293,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal async Task<DiscordRole> CreateGuildRoleAsync(ulong guild_id, string name, Permissions? permissions, int? color, bool? hoist, bool? mentionable, string reason)
+        internal async Task<DiscordRole> CreateGuildRoleAsync(ulong guild_id, string name, Permissions? permissions, int? color, bool? hoist, bool? mentionable, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildRolePayload
             {
@@ -1323,7 +1323,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Prune
-        internal async Task<int> GetGuildPruneCountAsync(ulong guild_id, int days, IEnumerable<ulong> include_roles)
+        internal async Task<int> GetGuildPruneCountAsync(ulong guild_id, int days, IEnumerable<ulong> include_roles, RestRequestOptions options)
         {
             if (days < 0 || days > 30)
                 throw new ArgumentException("Prune inactivity days must be a number between 0 and 30.", nameof(days));
@@ -1354,7 +1354,7 @@ namespace DSharpPlus.Net
             return pruned.Pruned.Value;
         }
 
-        internal async Task<int?> BeginGuildPruneAsync(ulong guild_id, int days, bool compute_prune_count, IEnumerable<ulong> include_roles, string reason)
+        internal async Task<int?> BeginGuildPruneAsync(ulong guild_id, int days, bool compute_prune_count, IEnumerable<ulong> include_roles, string reason, RestRequestOptions options)
         {
             if (days < 0 || days > 30)
                 throw new ArgumentException("Prune inactivity days must be a number between 0 and 30.", nameof(days));
@@ -1392,7 +1392,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region GuildVarious
-        internal async Task<IReadOnlyList<DiscordIntegration>> GetGuildIntegrationsAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordIntegration>> GetGuildIntegrationsAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.INTEGRATIONS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1405,7 +1405,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordIntegration>(new List<DiscordIntegration>(integrations_raw));
         }
 
-        internal async Task<DiscordGuildPreview> GetGuildPreviewAsync(ulong guild_id)
+        internal async Task<DiscordGuildPreview> GetGuildPreviewAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.PREVIEW}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1419,7 +1419,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordIntegration> CreateGuildIntegrationAsync(ulong guild_id, string type, ulong id)
+        internal async Task<DiscordIntegration> CreateGuildIntegrationAsync(ulong guild_id, string type, ulong id, RestRequestOptions options)
         {
             var pld = new RestGuildIntegrationAttachPayload
             {
@@ -1439,7 +1439,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordIntegration> ModifyGuildIntegrationAsync(ulong guild_id, ulong integration_id, int expire_behaviour, int expire_grace_period, bool enable_emoticons)
+        internal async Task<DiscordIntegration> ModifyGuildIntegrationAsync(ulong guild_id, ulong integration_id, int expire_behaviour, int expire_grace_period, bool enable_emoticons, RestRequestOptions options)
         {
             var pld = new RestGuildIntegrationModifyPayload
             {
@@ -1460,7 +1460,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteGuildIntegrationAsync(ulong guild_id, DiscordIntegration integration)
+        internal Task DeleteGuildIntegrationAsync(ulong guild_id, DiscordIntegration integration, RestRequestOptions options)
         {
             var pld = integration;
 
@@ -1471,7 +1471,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, payload: DiscordJson.SerializeObject(integration));
         }
 
-        internal Task SyncGuildIntegrationAsync(ulong guild_id, ulong integration_id)
+        internal Task SyncGuildIntegrationAsync(ulong guild_id, ulong integration_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.INTEGRATIONS}/:integration_id{Endpoints.SYNC}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.POST, route, new { guild_id, integration_id }, out var path);
@@ -1480,7 +1480,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.POST, route);
         }
 
-        internal async Task<DiscordGuildEmbed> GetGuildEmbedAsync(ulong guild_id)
+        internal async Task<DiscordGuildEmbed> GetGuildEmbedAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.EMBED}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1493,7 +1493,7 @@ namespace DSharpPlus.Net
             return embed;
         }
 
-        internal async Task<DiscordGuildEmbed> ModifyGuildEmbedAsync(ulong guild_id, DiscordGuildEmbed embed)
+        internal async Task<DiscordGuildEmbed> ModifyGuildEmbedAsync(ulong guild_id, DiscordGuildEmbed embed, RestRequestOptions options)
         {
             var pld = embed;
 
@@ -1508,7 +1508,7 @@ namespace DSharpPlus.Net
             return embed_rest;
         }
 
-        internal async Task<IReadOnlyList<DiscordVoiceRegion>> GetGuildVoiceRegionsAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordVoiceRegion>> GetGuildVoiceRegionsAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.REGIONS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1521,7 +1521,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordVoiceRegion>(new List<DiscordVoiceRegion>(regions_raw));
         }
 
-        internal async Task<IReadOnlyList<DiscordInvite>> GetGuildInvitesAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordInvite>> GetGuildInvitesAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.INVITES}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1536,7 +1536,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Invite
-        internal async Task<DiscordInvite> GetInviteAsync(string invite_code, bool? with_counts)
+        internal async Task<DiscordInvite> GetInviteAsync(string invite_code, bool? with_counts, RestRequestOptions options)
         {
             var urlparams = new Dictionary<string, string>();
             if (with_counts.HasValue)
@@ -1554,7 +1554,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordInvite> DeleteInviteAsync(string invite_code, string reason)
+        internal async Task<DiscordInvite> DeleteInviteAsync(string invite_code, string reason, RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1592,7 +1592,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Connections
-        internal async Task<IReadOnlyList<DiscordConnection>> GetUsersConnectionsAsync()
+        internal async Task<IReadOnlyList<DiscordConnection>> GetUsersConnectionsAsync(RestRequestOptions options)
         {
             var route = $"{Endpoints.USERS}{Endpoints.ME}{Endpoints.CONNECTIONS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { }, out var path);
@@ -1607,7 +1607,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Voice
-        internal async Task<IReadOnlyList<DiscordVoiceRegion>> ListVoiceRegionsAsync()
+        internal async Task<IReadOnlyList<DiscordVoiceRegion>> ListVoiceRegionsAsync(RestRequestOptions options)
         {
             var route = $"{Endpoints.VOICE}{Endpoints.REGIONS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { }, out var path);
