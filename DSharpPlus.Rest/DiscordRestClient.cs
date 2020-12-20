@@ -8,6 +8,7 @@ using System.Linq;
 using System;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Net.Models;
+using DSharpPlus.Net;
 
 namespace DSharpPlus
 {
@@ -51,17 +52,19 @@ namespace DSharpPlus
         /// <param name="iconb64">New guild's icon (base64)</param>
         /// <param name="verification_level">New guild's verification level</param>
         /// <param name="default_message_notifications">New guild's default message notification level</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<DiscordGuild> CreateGuildAsync(string name, string region_id, string iconb64, VerificationLevel? verification_level, DefaultMessageNotifications? default_message_notifications)
-            => this.ApiClient.CreateGuildAsync(name, region_id, iconb64, verification_level, default_message_notifications);
+        public Task<DiscordGuild> CreateGuildAsync(string name, string region_id, string iconb64, VerificationLevel? verification_level, DefaultMessageNotifications? default_message_notifications, RestRequestOptions options = null)
+            => this.ApiClient.CreateGuildAsync(name, region_id, iconb64, verification_level, default_message_notifications, options);
 
         /// <summary>
         /// Deletes a guild
         /// </summary>
         /// <param name="id">guild id</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task DeleteGuildAsync(ulong id)
-            => this.ApiClient.DeleteGuildAsync(id);
+        public Task DeleteGuildAsync(ulong id, RestRequestOptions options = null)
+            => this.ApiClient.DeleteGuildAsync(id, options);
 
         /// <summary>
         /// Modifies a guild
@@ -80,23 +83,25 @@ namespace DSharpPlus
         /// <param name="splashb64">New guild spalsh (base64)</param>
         /// <param name="systemChannelId">New guild system channel id</param>
         /// <param name="reason">Modify reason</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
         public Task<DiscordGuild> ModifyGuildAsync(ulong guild_id, Optional<string> name,
             Optional<string> region, Optional<VerificationLevel> verification_level,
             Optional<DefaultMessageNotifications> default_message_notifications, Optional<MfaLevel> mfa_level,
             Optional<ExplicitContentFilter> explicit_content_filter, Optional<ulong?> afk_channel_id,
             Optional<int> afk_timeout, Optional<string> iconb64, Optional<ulong> owner_id, Optional<string> splashb64,
-            Optional<ulong?> systemChannelId, string reason)
+            Optional<ulong?> systemChannelId, string reason, RestRequestOptions options)
             => this.ApiClient.ModifyGuildAsync(guild_id, name, region, verification_level, default_message_notifications, mfa_level, explicit_content_filter, afk_channel_id, afk_timeout, iconb64,
-                owner_id, splashb64, systemChannelId, reason);
+                owner_id, splashb64, systemChannelId, reason, options);
 
         /// <summary>
         /// Modifies a guild
         /// </summary>
         /// <param name="guild_id">Guild id</param>
         /// <param name="action">Guild modifications</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public async Task<DiscordGuild> ModifyGuildAsync(ulong guild_id, Action<GuildEditModel> action)
+        public async Task<DiscordGuild> ModifyGuildAsync(ulong guild_id, Action<GuildEditModel> action, RestRequestOptions options = null)
         {
             var mdl = new GuildEditModel();
             action(mdl);
@@ -121,16 +126,17 @@ namespace DSharpPlus
 
             return await this.ApiClient.ModifyGuildAsync(guild_id, mdl.Name, mdl.Region.IfPresent(x => x.Id), mdl.VerificationLevel, mdl.DefaultMessageNotifications,
                 mdl.MfaLevel, mdl.ExplicitContentFilter, mdl.AfkChannel.IfPresent(x => x?.Id), mdl.AfkTimeout, iconb64, mdl.Owner.IfPresent(x => x.Id),
-                splashb64, mdl.SystemChannel.IfPresent(x => x?.Id), mdl.AuditLogReason).ConfigureAwait(false);
+                splashb64, mdl.SystemChannel.IfPresent(x => x?.Id), mdl.AuditLogReason, options).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Gets guild bans
         /// </summary>
         /// <param name="guild_id">Guild id</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<IReadOnlyList<DiscordBan>> GetGuildBansAsync(ulong guild_id)
-            => this.ApiClient.GetGuildBansAsync(guild_id);
+        public Task<IReadOnlyList<DiscordBan>> GetGuildBansAsync(ulong guild_id, RestRequestOptions options = null)
+            => this.ApiClient.GetGuildBansAsync(guild_id, options);
 
         /// <summary>
         /// Creates guild ban
@@ -139,9 +145,10 @@ namespace DSharpPlus
         /// <param name="user_id">User id</param>
         /// <param name="delete_message_days">Days to delete messages</param>
         /// <param name="reason">Reason why this member was banned</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task CreateGuildBanAsync(ulong guild_id, ulong user_id, int delete_message_days, string reason)
-            => this.ApiClient.CreateGuildBanAsync(guild_id, user_id, delete_message_days, reason);
+        public Task CreateGuildBanAsync(ulong guild_id, ulong user_id, int delete_message_days, string reason, RestRequestOptions options = null)
+            => this.ApiClient.CreateGuildBanAsync(guild_id, user_id, delete_message_days, reason, options);
 
         /// <summary>
         /// Removes a guild ban
@@ -646,26 +653,29 @@ namespace DSharpPlus
         /// <summary>
         /// Gets current user object
         /// </summary>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<DiscordUser> GetCurrentUserAsync()
-            => this.ApiClient.GetCurrentUserAsync();
+        public Task<DiscordUser> GetCurrentUserAsync(RestRequestOptions options = null)
+            => this.ApiClient.GetCurrentUserAsync(options);
 
         /// <summary>
         /// Gets user object
         /// </summary>
         /// <param name="user">User id</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<DiscordUser> GetUserAsync(ulong user)
-            => this.ApiClient.GetUserAsync(user);
+        public Task<DiscordUser> GetUserAsync(ulong user, RestRequestOptions options = null)
+            => this.ApiClient.GetUserAsync(user, options);
 
         /// <summary>
         /// Gets guild member
         /// </summary>
         /// <param name="guild_id">Guild id</param>
         /// <param name="member_id">Member id</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<DiscordMember> GetGuildMemberAsync(ulong guild_id, ulong member_id)
-            => this.ApiClient.GetGuildMemberAsync(guild_id, member_id);
+        public Task<DiscordMember> GetGuildMemberAsync(ulong guild_id, ulong member_id, RestRequestOptions options = null)
+            => this.ApiClient.GetGuildMemberAsync(guild_id, member_id, options);
 
         /// <summary>
         /// Removes guild member
@@ -673,33 +683,36 @@ namespace DSharpPlus
         /// <param name="guild_id">Guild id</param>
         /// <param name="user_id">User id</param>
         /// <param name="reason">Why this user was removed</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task RemoveGuildMemberAsync(ulong guild_id, ulong user_id, string reason)
-            => this.ApiClient.RemoveGuildMemberAsync(guild_id, user_id, reason);
+        public Task RemoveGuildMemberAsync(ulong guild_id, ulong user_id, string reason, RestRequestOptions options = null)
+            => this.ApiClient.RemoveGuildMemberAsync(guild_id, user_id, reason, options);
 
         /// <summary>
         /// Modifies current user
         /// </summary>
         /// <param name="username">New username</param>
         /// <param name="base64_avatar">New avatar (base64)</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public async Task<DiscordUser> ModifyCurrentUserAsync(string username, string base64_avatar)
-            => new DiscordUser(await this.ApiClient.ModifyCurrentUserAsync(username, base64_avatar).ConfigureAwait(false)) { Discord = this };
+        public async Task<DiscordUser> ModifyCurrentUserAsync(string username, string base64_avatar, RestRequestOptions options = null)
+            => new DiscordUser(await this.ApiClient.ModifyCurrentUserAsync(username, base64_avatar, options).ConfigureAwait(false)) { Discord = this };
 
         /// <summary>
         /// Modifies current user
         /// </summary>
         /// <param name="username">username</param>
         /// <param name="avatar">avatar</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public async Task<DiscordUser> ModifyCurrentUserAsync(string username = null, Stream avatar = null)
+        public async Task<DiscordUser> ModifyCurrentUserAsync(string username = null, Stream avatar = null, RestRequestOptions options = null)
         {
             string av64 = null;
             if (avatar != null)
                 using (var imgtool = new ImageTool(avatar))
                     av64 = imgtool.GetBase64();
 
-            return new DiscordUser(await this.ApiClient.ModifyCurrentUserAsync(username, av64).ConfigureAwait(false)) { Discord = this };
+            return new DiscordUser(await this.ApiClient.ModifyCurrentUserAsync(username, av64, options).ConfigureAwait(false)) { Discord = this };
         }
 
         /// <summary>
@@ -708,9 +721,10 @@ namespace DSharpPlus
         /// <param name="limit">Limit of guilds to get</param>
         /// <param name="before">Gets guild before id</param>
         /// <param name="after">Gets guilds after id</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task<IReadOnlyList<DiscordGuild>> GetCurrentUserGuildsAsync(int limit = 100, ulong? before = null, ulong? after = null)
-            => this.ApiClient.GetCurrentUserGuildsAsync(limit, before, after);
+        public Task<IReadOnlyList<DiscordGuild>> GetCurrentUserGuildsAsync(int limit = 100, ulong? before = null, ulong? after = null, RestRequestOptions options = null)
+            => this.ApiClient.GetCurrentUserGuildsAsync(limit, before, after, options);
 
         /// <summary>
         /// Modifies guild member
@@ -723,11 +737,12 @@ namespace DSharpPlus
         /// <param name="deaf">Whether this user should be deafened</param>
         /// <param name="voice_channel_id">Voice channel to move this user to</param>
         /// <param name="reason">Reason this user was modified</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
         public Task ModifyGuildMemberAsync(ulong guild_id, ulong user_id, Optional<string> nick,
             Optional<IEnumerable<ulong>> role_ids, Optional<bool> mute, Optional<bool> deaf,
-            Optional<ulong?> voice_channel_id, string reason)
-            => this.ApiClient.ModifyGuildMemberAsync(guild_id, user_id, nick, role_ids, mute, deaf, voice_channel_id, reason);
+            Optional<ulong?> voice_channel_id, string reason, RestRequestOptions options = null)
+            => this.ApiClient.ModifyGuildMemberAsync(guild_id, user_id, nick, role_ids, mute, deaf, voice_channel_id, reason, options);
 
         /// <summary>
         /// Modifies a member
@@ -735,8 +750,9 @@ namespace DSharpPlus
         /// <param name="member_id">Member id</param>
         /// <param name="guild_id">Guild id</param>
         /// <param name="action">Modifications</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public async Task ModifyAsync(ulong member_id, ulong guild_id, Action<MemberEditModel> action)
+        public async Task ModifyAsync(ulong member_id, ulong guild_id, Action<MemberEditModel> action, RestRequestOptions options = null)
         {
             var mdl = new MemberEditModel();
             action(mdl);
@@ -747,16 +763,16 @@ namespace DSharpPlus
             if (mdl.Nickname.HasValue && this.CurrentUser.Id == member_id)
             {
                 await this.ApiClient.ModifyCurrentMemberNicknameAsync(guild_id, mdl.Nickname.Value,
-                    mdl.AuditLogReason).ConfigureAwait(false);
+                    mdl.AuditLogReason, options).ConfigureAwait(false);
                 await this.ApiClient.ModifyGuildMemberAsync(guild_id, member_id, Optional.FromNoValue<string>(),
                     mdl.Roles.IfPresent(e => e.Select(xr => xr.Id)), mdl.Muted, mdl.Deafened,
-                    mdl.VoiceChannel.IfPresent(e => e?.Id), mdl.AuditLogReason).ConfigureAwait(false);
+                    mdl.VoiceChannel.IfPresent(e => e?.Id), mdl.AuditLogReason, options).ConfigureAwait(false);
             }
             else
             {
                 await this.ApiClient.ModifyGuildMemberAsync(guild_id, member_id, mdl.Nickname,
                     mdl.Roles.IfPresent(e => e.Select(xr => xr.Id)), mdl.Muted, mdl.Deafened,
-                    mdl.VoiceChannel.IfPresent(e => e?.Id), mdl.AuditLogReason).ConfigureAwait(false);
+                    mdl.VoiceChannel.IfPresent(e => e?.Id), mdl.AuditLogReason, options).ConfigureAwait(false);
             }
         }
 
@@ -766,9 +782,10 @@ namespace DSharpPlus
         /// <param name="guild_id">Guild id</param>
         /// <param name="nick">Nickname</param>
         /// <param name="reason">Reason why you set it to this</param>
+        /// <param name="options">Optional request handling options. </param>
         /// <returns></returns>
-        public Task ModifyCurrentMemberNicknameAsync(ulong guild_id, string nick, string reason)
-            => this.ApiClient.ModifyCurrentMemberNicknameAsync(guild_id, nick, reason);
+        public Task ModifyCurrentMemberNicknameAsync(ulong guild_id, string nick, string reason, RestRequestOptions options = null)
+            => this.ApiClient.ModifyCurrentMemberNicknameAsync(guild_id, nick, reason, options);
         #endregion
 
         #region Roles

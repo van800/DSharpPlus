@@ -1622,7 +1622,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Webhooks
-        internal async Task<DiscordWebhook> CreateWebhookAsync(ulong channel_id, string name, Optional<string> base64_avatar, string reason)
+        internal async Task<DiscordWebhook> CreateWebhookAsync(ulong channel_id, string name, Optional<string> base64_avatar, string reason, RestRequestOptions options)
         {
             var pld = new RestWebhookPayload
             {
@@ -1648,7 +1648,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<IReadOnlyList<DiscordWebhook>> GetChannelWebhooksAsync(ulong channel_id)
+        internal async Task<IReadOnlyList<DiscordWebhook>> GetChannelWebhooksAsync(ulong channel_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.WEBHOOKS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id }, out var path);
@@ -1661,7 +1661,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordWebhook>(new List<DiscordWebhook>(webhooks_raw));
         }
 
-        internal async Task<IReadOnlyList<DiscordWebhook>> GetGuildWebhooksAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordWebhook>> GetGuildWebhooksAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.WEBHOOKS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1674,7 +1674,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordWebhook>(new List<DiscordWebhook>(webhooks_raw));
         }
 
-        internal async Task<DiscordWebhook> GetWebhookAsync(ulong webhook_id)
+        internal async Task<DiscordWebhook> GetWebhookAsync(ulong webhook_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.WEBHOOKS}/:webhook_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { webhook_id }, out var path);
@@ -1690,7 +1690,7 @@ namespace DSharpPlus.Net
         }
 
         // Auth header not required
-        internal async Task<DiscordWebhook> GetWebhookWithTokenAsync(ulong webhook_id, string webhook_token)
+        internal async Task<DiscordWebhook> GetWebhookWithTokenAsync(ulong webhook_id, string webhook_token, RestRequestOptions options)
         {
             var route = $"{Endpoints.WEBHOOKS}/:webhook_id/:webhook_token";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { webhook_id, webhook_token }, out var path);
@@ -1707,7 +1707,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordWebhook> ModifyWebhookAsync(ulong webhook_id, ulong channelId, string name, Optional<string> base64_avatar, string reason)
+        internal async Task<DiscordWebhook> ModifyWebhookAsync(ulong webhook_id, ulong channelId, string name, Optional<string> base64_avatar, string reason, RestRequestOptions options)
         {
             var pld = new RestWebhookPayload
             {
@@ -1734,7 +1734,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordWebhook> ModifyWebhookAsync(ulong webhook_id, string name, string base64_avatar, string webhook_token, string reason)
+        internal async Task<DiscordWebhook> ModifyWebhookAsync(ulong webhook_id, string name, string base64_avatar, string webhook_token, string reason, RestRequestOptions options)
         {
             var pld = new RestWebhookPayload
             {
@@ -1759,7 +1759,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal Task DeleteWebhookAsync(ulong webhook_id, string reason)
+        internal Task DeleteWebhookAsync(ulong webhook_id, string reason, RestRequestOptions options)
         {
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1785,7 +1785,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal async Task<DiscordMessage> ExecuteWebhookAsync(ulong webhook_id, string webhook_token, string content, Optional<string> username, Optional<string> avatar_url, bool? tts, IEnumerable<DiscordEmbed> embeds, IReadOnlyDictionary<string, Stream> files, IEnumerable<IMention> mentions)
+        internal async Task<DiscordMessage> ExecuteWebhookAsync(ulong webhook_id, string webhook_token, string content, Optional<string> username, Optional<string> avatar_url, bool? tts, IEnumerable<DiscordEmbed> embeds, IReadOnlyDictionary<string, Stream> files, IEnumerable<IMention> mentions, RestRequestOptions options)
         {
             if (files?.Count == 0 && string.IsNullOrEmpty(content) && embeds == null)
                 throw new ArgumentException("You must specify content, an embed, or at least one file.");
@@ -1821,7 +1821,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordMessage> ExecuteWebhookSlackAsync(ulong webhook_id, string webhook_token, string json_payload)
+        internal async Task<DiscordMessage> ExecuteWebhookSlackAsync(ulong webhook_id, string webhook_token, string json_payload, RestRequestOptions options)
         {
             var route = $"{Endpoints.WEBHOOKS}/:webhook_id/:webhook_token{Endpoints.SLACK}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.POST, route, new { webhook_id, webhook_token }, out var path);
@@ -1833,7 +1833,7 @@ namespace DSharpPlus.Net
             return ret;
         }
 
-        internal async Task<DiscordMessage> ExecuteWebhookGithubAsync(ulong webhook_id, string webhook_token, string json_payload)
+        internal async Task<DiscordMessage> ExecuteWebhookGithubAsync(ulong webhook_id, string webhook_token, string json_payload, RestRequestOptions options)
         {
             var route = $"{Endpoints.WEBHOOKS}/:webhook_id/:webhook_token{Endpoints.GITHUB}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.POST, route, new { webhook_id, webhook_token }, out var path);
@@ -1847,7 +1847,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Reactions
-        internal Task CreateReactionAsync(ulong channel_id, ulong message_id, string emoji)
+        internal Task CreateReactionAsync(ulong channel_id, ulong message_id, string emoji, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id{Endpoints.REACTIONS}/:emoji{Endpoints.ME}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.PUT, route, new { channel_id, message_id, emoji }, out var path);
@@ -1856,7 +1856,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.PUT, route, ratelimitWaitOverride: this.Discord.Configuration.UseRelativeRatelimit ? null : (double?)0.26);
         }
 
-        internal Task DeleteOwnReactionAsync(ulong channel_id, ulong message_id, string emoji)
+        internal Task DeleteOwnReactionAsync(ulong channel_id, ulong message_id, string emoji, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id{Endpoints.REACTIONS}/:emoji{Endpoints.ME}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { channel_id, message_id, emoji }, out var path);
@@ -1865,7 +1865,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, ratelimitWaitOverride: this.Discord.Configuration.UseRelativeRatelimit ? null : (double?)0.26);
         }
 
-        internal Task DeleteUserReactionAsync(ulong channel_id, ulong message_id, ulong user_id, string emoji, string reason)
+        internal Task DeleteUserReactionAsync(ulong channel_id, ulong message_id, ulong user_id, string emoji, string reason, RestRequestOptions options)
         {
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1878,7 +1878,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers, ratelimitWaitOverride: this.Discord.Configuration.UseRelativeRatelimit ? null : (double?)0.26);
         }
 
-        internal async Task<IReadOnlyList<DiscordUser>> GetReactionsAsync(ulong channel_id, ulong message_id, string emoji, ulong? after_id = null, int limit = 25)
+        internal async Task<IReadOnlyList<DiscordUser>> GetReactionsAsync(ulong channel_id, ulong message_id, string emoji, ulong? after_id = null, int limit = 25, RestRequestOptions options = null)
         {
             var urlparams = new Dictionary<string, string>();
             if (after_id.HasValue)
@@ -1911,7 +1911,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordUser>(new List<DiscordUser>(reacters));
         }
 
-        internal Task DeleteAllReactionsAsync(ulong channel_id, ulong message_id, string reason)
+        internal Task DeleteAllReactionsAsync(ulong channel_id, ulong message_id, string reason, RestRequestOptions options)
         {
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -1924,7 +1924,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers, ratelimitWaitOverride: this.Discord.Configuration.UseRelativeRatelimit ? null : (double?)0.26);
         }
 
-        internal Task DeleteReactionsEmojiAsync(ulong channel_id, ulong message_id, string emoji)
+        internal Task DeleteReactionsEmojiAsync(ulong channel_id, ulong message_id, string emoji, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id{Endpoints.REACTIONS}/:emoji";
             var bucket = this.Rest.GetBucket(RestRequestMethod.DELETE, route, new { channel_id, message_id, emoji }, out var path);
@@ -1935,7 +1935,7 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Emoji
-        internal async Task<IReadOnlyList<DiscordGuildEmoji>> GetGuildEmojisAsync(ulong guild_id)
+        internal async Task<IReadOnlyList<DiscordGuildEmoji>> GetGuildEmojisAsync(ulong guild_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.EMOJIS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id }, out var path);
@@ -1971,7 +1971,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordGuildEmoji>(emojis);
         }
 
-        internal async Task<DiscordGuildEmoji> GetGuildEmojiAsync(ulong guild_id, ulong emoji_id)
+        internal async Task<DiscordGuildEmoji> GetGuildEmojiAsync(ulong guild_id, ulong emoji_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.GUILDS}/:guild_id{Endpoints.EMOJIS}/:emoji_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { guild_id, emoji_id }, out var path);
@@ -1992,7 +1992,7 @@ namespace DSharpPlus.Net
             return emoji;
         }
 
-        internal async Task<DiscordGuildEmoji> CreateGuildEmojiAsync(ulong guild_id, string name, string imageb64, IEnumerable<ulong> roles, string reason)
+        internal async Task<DiscordGuildEmoji> CreateGuildEmojiAsync(ulong guild_id, string name, string imageb64, IEnumerable<ulong> roles, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildEmojiCreatePayload
             {
@@ -2026,7 +2026,7 @@ namespace DSharpPlus.Net
             return emoji;
         }
 
-        internal async Task<DiscordGuildEmoji> ModifyGuildEmojiAsync(ulong guild_id, ulong emoji_id, string name, IEnumerable<ulong> roles, string reason)
+        internal async Task<DiscordGuildEmoji> ModifyGuildEmojiAsync(ulong guild_id, ulong emoji_id, string name, IEnumerable<ulong> roles, string reason, RestRequestOptions options)
         {
             var pld = new RestGuildEmojiModifyPayload
             {
@@ -2057,7 +2057,7 @@ namespace DSharpPlus.Net
             return emoji;
         }
 
-        internal Task DeleteGuildEmojiAsync(ulong guild_id, ulong emoji_id, string reason)
+        internal Task DeleteGuildEmojiAsync(ulong guild_id, ulong emoji_id, string reason, RestRequestOptions options)
         {
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(reason))
@@ -2072,13 +2072,13 @@ namespace DSharpPlus.Net
         #endregion
 
         #region Misc
-        internal Task<TransportApplication> GetCurrentApplicationInfoAsync()
-            => this.GetApplicationInfoAsync("@me");
+        internal Task<TransportApplication> GetCurrentApplicationInfoAsync(RestRequestOptions options)
+            => this.GetApplicationInfoAsync("@me", options);
 
-        internal Task<TransportApplication> GetApplicationInfoAsync(ulong application_id)
-            => this.GetApplicationInfoAsync(application_id.ToString(CultureInfo.InvariantCulture));
+        internal Task<TransportApplication> GetApplicationInfoAsync(ulong application_id, RestRequestOptions options)
+            => this.GetApplicationInfoAsync(application_id.ToString(CultureInfo.InvariantCulture), options);
 
-        private async Task<TransportApplication> GetApplicationInfoAsync(string application_id)
+        private async Task<TransportApplication> GetApplicationInfoAsync(string application_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.OAUTH2}{Endpoints.APPLICATIONS}/:application_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { application_id }, out var path);
@@ -2089,7 +2089,7 @@ namespace DSharpPlus.Net
             return JsonConvert.DeserializeObject<TransportApplication>(res.Response);
         }
 
-        internal async Task<IReadOnlyList<DiscordApplicationAsset>> GetApplicationAssetsAsync(DiscordApplication application)
+        internal async Task<IReadOnlyList<DiscordApplicationAsset>> GetApplicationAssetsAsync(DiscordApplication application, RestRequestOptions options)
         {
             var route = $"{Endpoints.OAUTH2}{Endpoints.APPLICATIONS}/:application_id{Endpoints.ASSETS}";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { application_id = application.Id }, out var path);
@@ -2107,7 +2107,7 @@ namespace DSharpPlus.Net
             return new ReadOnlyCollection<DiscordApplicationAsset>(new List<DiscordApplicationAsset>(assets));
         }
 
-        internal async Task<GatewayInfo> GetGatewayInfoAsync()
+        internal async Task<GatewayInfo> GetGatewayInfoAsync(RestRequestOptions options)
         {
             var headers = Utilities.GetBaseHeaders();
             var route = Endpoints.GATEWAY;
