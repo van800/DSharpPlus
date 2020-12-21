@@ -596,7 +596,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal async Task<DiscordMessage> GetMessageAsync(ulong channel_id, ulong message_id)
+        internal async Task<DiscordMessage> GetMessageAsync(ulong channel_id, ulong message_id, RestRequestOptions options)
         {
             var route = $"{Endpoints.CHANNELS}/:channel_id{Endpoints.MESSAGES}/:message_id";
             var bucket = this.Rest.GetBucket(RestRequestMethod.GET, route, new { channel_id, message_id }, out var path);
@@ -833,7 +833,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal Task DeleteMessagesAsync(ulong channel_id, IEnumerable<ulong> message_ids, string reason)
+        internal Task DeleteMessagesAsync(ulong channel_id, IEnumerable<ulong> message_ids, string reason, RestRequestOptions options)
         {
             var pld = new RestChannelMessageBulkDeletePayload
             {
@@ -1772,7 +1772,7 @@ namespace DSharpPlus.Net
             return this.DoRequestAsync(this.Discord, bucket, url, RestRequestMethod.DELETE, route, headers);
         }
 
-        internal Task DeleteWebhookAsync(ulong webhook_id, string webhook_token, string reason)
+        internal Task DeleteWebhookAsync(ulong webhook_id, string webhook_token, string reason, RestRequestOptions options)
         {
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrWhiteSpace(reason))

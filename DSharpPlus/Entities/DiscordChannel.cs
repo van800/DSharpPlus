@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Exceptions;
+using DSharpPlus.Net;
 using DSharpPlus.Net.Abstractions;
 using DSharpPlus.Net.Models;
 using Newtonsoft.Json;
@@ -354,18 +355,19 @@ namespace DSharpPlus.Entities
         /// Modifies the current channel.
         /// </summary>
         /// <param name="action">Action to perform on this channel</param>
+        /// <param name="options">Optional handling options for this request.</param>
         /// <returns></returns>
         /// <exception cref="Exceptions.UnauthorizedException">Thrown when the client does not have the <see cref="Permissions.ManageChannels"/> permission.</exception>
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task ModifyAsync(Action<ChannelEditModel> action)
+        public Task ModifyAsync(Action<ChannelEditModel> action, RestRequestOptions options = null)
         {
             var mdl = new ChannelEditModel();
             action(mdl);
             return this.Discord.ApiClient.ModifyChannelAsync(this.Id, mdl.Name, mdl.Position, mdl.Topic, mdl.Nsfw,
                 mdl.Parent.HasValue ? mdl.Parent.Value?.Id : default(Optional<ulong?>), mdl.Bitrate, mdl.Userlimit, mdl.PerUserRateLimit, 
-                mdl.AuditLogReason);
+                mdl.AuditLogReason, options);
         }
 
         /// <summary>
@@ -378,7 +380,7 @@ namespace DSharpPlus.Entities
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task ModifyPositionAsync(int position, string reason = null)
+        public Task ModifyPositionAsync(int position, string reason = null, RestRequestOptions options = null)
         {
             if (this.Guild == null)
                 throw new InvalidOperationException("Cannot modify order of non-guild channels.");
@@ -410,7 +412,7 @@ namespace DSharpPlus.Entities
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task<IReadOnlyList<DiscordMessage>> GetMessagesBeforeAsync(ulong before, int limit = 100)
+        public Task<IReadOnlyList<DiscordMessage>> GetMessagesBeforeAsync(ulong before, int limit = 100, RestRequestOptions options = null)
             => this.GetMessagesInternalAsync(limit, before, null, null);
 
         /// <summary>  
@@ -422,7 +424,7 @@ namespace DSharpPlus.Entities
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAfterAsync(ulong after, int limit = 100)
+        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAfterAsync(ulong after, int limit = 100, RestRequestOptions options = null)
             => this.GetMessagesInternalAsync(limit, null, after, null);
 
         /// <summary>  
@@ -434,7 +436,7 @@ namespace DSharpPlus.Entities
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAroundAsync(ulong around, int limit = 100)
+        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAroundAsync(ulong around, int limit = 100, RestRequestOptions options = null)
             => this.GetMessagesInternalAsync(limit, null, null, around);
 
         /// <summary>  
@@ -445,7 +447,7 @@ namespace DSharpPlus.Entities
         /// <exception cref="Exceptions.NotFoundException">Thrown when the channel does not exist.</exception>
         /// <exception cref="Exceptions.BadRequestException">Thrown when an invalid parameter was provided.</exception>
         /// <exception cref="Exceptions.ServerErrorException">Thrown when Discord is unable to process the request.</exception>
-        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAsync(int limit = 100) =>
+        public Task<IReadOnlyList<DiscordMessage>> GetMessagesAsync(int limit = 100, RestRequestOptions options = null) =>
             this.GetMessagesInternalAsync(limit, null, null, null);
 
         private async Task<IReadOnlyList<DiscordMessage>> GetMessagesInternalAsync(int limit = 100, ulong? before = null, ulong? after = null, ulong? around = null)
