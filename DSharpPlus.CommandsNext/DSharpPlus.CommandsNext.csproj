@@ -24,4 +24,10 @@
     <ProjectReference Include="..\DSharpPlus\DSharpPlus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DSharpPlus.CommandsNext.ExternalAnnotations.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
