@@ -24,4 +24,8 @@
     <ProjectReference Include="..\DSharpPlus\DSharpPlus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2021.1.0-eap01" />
+  </ItemGroup>
+
 </Project>

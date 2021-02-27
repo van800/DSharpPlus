@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace DSharpPlus.CommandsNext.Attributes
 {
     /// <summary>
     /// Marks this method as a command.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false), MeansImplicitUse]
     public sealed class CommandAttribute : Attribute
     {
         /// <summary>
