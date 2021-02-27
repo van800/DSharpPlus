@@ -25,7 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="DSharpPlus.CommandsNext.ExternalAnnotations.xml">
+    <None Include="DSharpPlus.CommandsNext.ExternalAnnotations.xml">
+      <Pack>True</Pack>
+      <PackagePath>lib/$(TargetFrameworks)</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
