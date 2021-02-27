@@ -1,0 +1,5 @@
+<assembly name="DSharpPlus.CommandsNext">
+  <member name="T:DSharpPlus.CommandsNext.Attributes.CommandAttribute">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+</assembly>
